@@ -1,0 +1,30 @@
+broker.id=1
+listeners=PLAINTEXT://:9093
+log.dir=/tmp/kafka-logs-1
+zookeeper.connect=localhost:2181
+zookeeper.connection.timeout.ms=6000
+
+broker.id=2
+listeners=PLAINTEXT://:9094
+log.dir=/tmp/kafka-logs-2
+zookeeper.connect=localhost:2181
+zookeeper.connection.timeout.ms=6000
+
+broker.id=3
+listeners=PLAINTEXT://:9095
+log.dir=/tmp/kafka-logs-3
+zookeeper.connect=localhost:2181
+zookeeper.connection.timeout.ms=6000
+
+
+bin/zookeeper-server-start.sh config/zookeeper.properties
+bin/kafka-server-start.sh config/server-1.properties
+bin/kafka-server-start.sh config/server-2.properties
+bin/kafka-server-start.sh config/server-3.properties
+bin/kafka-server-start.sh config/server.properties
+
+bin/kafka-console-producer.sh --broker-list localhost:9093 --topic my-replicated-topic
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --topic my-replicated-topic --from-beginning
+
+bin/kafka-streams-application-reset.sh --application-id streams-wordcount --input-topics streams-file-input
+
