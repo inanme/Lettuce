@@ -26,5 +26,25 @@ bin/kafka-server-start.sh config/server.properties
 bin/kafka-console-producer.sh --broker-list localhost:9093 --topic my-replicated-topic
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --topic my-replicated-topic --from-beginning
 
-bin/kafka-streams-application-reset.sh --application-id streams-wordcount --input-topics streams-file-input
+bin/kafka-streams-application-reset.sh --bootstrap-servers localhost:9093 --application-id streams-wordcount --input-topics streams-file-input
 
+==========
+bin/kafka-console-producer.sh --broker-list localhost:9093 --topic my-replicated-topic
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --topic my-replicated-topic --from-beginning
+==========
+
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic streams-file-input
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic streams-wordcount-output
+
+bin/kafka-console-producer.sh --broker-list localhost:9093 --topic streams-file-input < file-input.txt
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 \
+            --topic streams-wordcount-output \
+            --from-beginning \
+            --formatter kafka.tools.DefaultMessageFormatter \
+            --property print.key=true \
+            --property print.value=true \
+            --property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer \
+            --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
+
+
+bin/kafka-topics.sh --list --zookeeper localhost:2181

@@ -10,8 +10,9 @@ import org.apache.kafka.streams.kstream.KStreamBuilder;
 import org.apache.kafka.streams.kstream.KTable;
 
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Properties;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Demonstrates, using the high-level KStream DSL, how to implement the WordCount program
@@ -26,10 +27,11 @@ import java.util.Properties;
  * bin/kafka-console-producer.sh). Otherwise you won't see any data arriving in the output topic.
  */
 public class KafkaStream {
+
     public static void main(String[] args) throws Exception {
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-wordcount");
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
         props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
@@ -43,9 +45,11 @@ public class KafkaStream {
         KStream<String, String> source = builder.stream("streams-file-input");
 
         KTable<String, Long> counts = source
-                .flatMapValues(value -> Arrays.asList(value.toLowerCase(Locale.getDefault()).split("\\s+")))
-                .map((key, value) -> new KeyValue<>(value, value))
-                .groupByKey()
+                .flatMap((k, v) -> {
+                    System.out.println(k + "-" + v);
+                    return Arrays.stream(v.toLowerCase().split("\\s+")).map(s -> new KeyValue<>(k, s)).collect(toList());
+                })
+                .groupBy((k, v) -> v)
                 .count("Counts");
 
         // need to override value serde to Long type
