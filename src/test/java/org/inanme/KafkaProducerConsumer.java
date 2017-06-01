@@ -8,15 +8,14 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 
-import java.lang.reflect.Array;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
 import java.util.stream.LongStream;
+
+import static org.inanme.Functions.toArray;
+import static org.inanme.Functions.wait1;
 
 public class KafkaProducerConsumer {
     public static class MyProducer {
@@ -69,19 +68,4 @@ public class KafkaProducerConsumer {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Collector<T, ArrayList<T>, T[]> toArray(Class<T> clazz) {
-        return Collector.of(ArrayList::new, List::add, (left, right) -> {
-            left.addAll(right);
-            return left;
-        }, list -> list.toArray((T[]) Array.newInstance(clazz, list.size())));
-    }
-
-    public static void wait1() {
-        try {
-            TimeUnit.SECONDS.sleep(1l);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

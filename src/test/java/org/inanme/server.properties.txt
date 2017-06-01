@@ -16,15 +16,22 @@ log.dir=/tmp/kafka-logs-3
 zookeeper.connect=localhost:2181
 zookeeper.connection.timeout.ms=6000
 
+dataDir=/tmp/zookeeper
+
 
 bin/zookeeper-server-start.sh config/zookeeper.properties
 bin/kafka-server-start.sh config/server-1.properties
 bin/kafka-server-start.sh config/server-2.properties
 bin/kafka-server-start.sh config/server-3.properties
+
 bin/kafka-server-start.sh config/server.properties
 
 bin/kafka-console-producer.sh --broker-list localhost:9093 --topic my-replicated-topic
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --topic my-replicated-topic --from-beginning
+
+
+Each partition can be replicated across multiple Kafka broker nodes to tolerate node failures.
+One of a partition's replicas is chosen as leader, and the leader handles all reads and writes of messages in that partition.
 
 bin/kafka-streams-application-reset.sh --bootstrap-servers localhost:9093 --application-id streams-wordcount --input-topics streams-file-input
 
@@ -35,6 +42,9 @@ bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --topic my-repli
 
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic intstream-topic
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic streams-wordcount-output
+
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic name-topic
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic surname-topic
 
 bin/kafka-console-producer.sh --broker-list localhost:9093 --topic streams-file-input < file-input.txt
 bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 \
