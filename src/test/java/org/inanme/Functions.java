@@ -15,9 +15,9 @@ public class Functions {
         }, list -> list.toArray((T[]) Array.newInstance(clazz, list.size())));
     }
 
-    public static void wait1() {
+    public static void mysleep(long ms) {
         try {
-            TimeUnit.MILLISECONDS.sleep(1500L);
+            TimeUnit.MILLISECONDS.sleep(ms);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

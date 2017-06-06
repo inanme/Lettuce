@@ -2,7 +2,11 @@ package org.inanme;
 
 import io.vertx.core.json.JsonObject;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.KafkaStreams;
@@ -15,8 +19,8 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.LongStream;
 
+import static org.inanme.Functions.mysleep;
 import static org.inanme.Functions.toArray;
-import static org.inanme.Functions.wait1;
 
 public class KafkaProducerConsumerJoin {
 
@@ -31,7 +35,7 @@ public class KafkaProducerConsumerJoin {
                 .mapToObj(i -> new ProducerRecord<>(key + "-topic", "person:id:" + i, new JsonObject().put(key, key + i).encode()))
                 .map(record -> {
                     CompletableFuture<RecordMetadata> completableFuture = new CompletableFuture<>();
-                    wait1();
+                    mysleep(1500L);
                     producer.send(record, (rm, th) -> {
                         if (th == null) {
                             System.err.printf("Producer topic:%s key:%s value:%s par:%d\n", key, record.key(), record.value(), record.partition());
@@ -78,7 +82,7 @@ public class KafkaProducerConsumerJoin {
     public static void main(String... args) {
         //new Thread(() -> produce("name")).start();
         //new Thread(() -> produce("surname")).start();
-        wait1();
+        mysleep(1500L);
         new Thread(() -> merge("name-topic", "surname-topic")).start();
     }
 
